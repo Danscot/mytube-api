@@ -1,35 +1,22 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import yt_dlp
-
-app = FastAPI()
-
-class DownloadRequest(BaseModel):
-    url: str
+from fastapi.responses import FileResponse
 
 @app.post("/download")
-def download_video(data: DownloadRequest):
+def download_video(data: VideoURL):
     try:
-        ydl_opts = {
-            "format": "bestaudio/best",  # Just audio = less bot detection
-            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",  # Spoof browser
-            "outtmpl": "downloads/%(title)s.%(ext)s",
-            "postprocessors": [{
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-                "preferredquality": "192",
-            }],
-            "quiet": True,
-        }
+        # Download video
+        download_audio_from_video(data.url)
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(data.url, download=True)
-            filename = ydl.prepare_filename(info).replace(".webm", ".mp3").replace(".m4a", ".mp3")
-            return {
-                "title": info.get("title"),
-                "filename": filename,
-                "status": "Downloaded successfully"
-            }
+        # Find the last downloaded .mp3 file
+        files = sorted(
+            [f for f in os.listdir(output_directory) if f.endswith(".mp3")],
+            key=lambda x: os.path.getmtime(os.path.join(output_directory, x)),
+            reverse=True
+        )
 
+        if not files:
+            raise Exception("No MP3 file found after download.")
+
+        last_file = os.path.join(output_directory, files[0])
+        return FileResponse(last_file, media_type="audio/mpeg", filename=files[0])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
