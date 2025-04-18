@@ -1,61 +1,55 @@
-import os
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import os
 import yt_dlp
-import uuid
 
 app = FastAPI()
 
-# Create output folder if it doesn't exist
-DOWNLOAD_DIR = "Download__"
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+# Ensure output directory exists
+output_directory = 'Download__'
+os.makedirs(output_directory, exist_ok=True)
 
-# Request body schema
+# Request body model
 class VideoURL(BaseModel):
     url: str
 
-@app.get("/")
-def home():
-    return {"message": "✅ MyTube API is up and running!"}
+# Progress hook (optional)
+def progress_hook(d):
+    if d['status'] == 'downloading':
+        percent = d.get('_percent_str', 'N/A')
+        speed = d.get('speed', 0)
+        print(f"Downloading: {percent} at {speed / 1024:.2f} KB/s")
+    elif d['status'] == 'finished':
+        print(f"✅ Finished downloading: {d['filename']}")
 
-@app.post("/download")
-def download_audio(data: VideoURL):
-    video_url = data.url
-
-    # Generate a unique filename to avoid clashes
-    temp_filename = f"{uuid.uuid4()}.%(ext)s"
-    output_template = os.path.join(DOWNLOAD_DIR, temp_filename)
-
+# Download function
+def download_audio_from_video(video_url: str):
     ydl_opts = {
-        "format": "bestaudio/best",
-        "outtmpl": output_template,
-        "quiet": True,
-        "postprocessors": [{
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
         }],
-        "noplaylist": True,
-        "ignoreerrors": True,
-        "http_headers": {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Accept-Language": "en-US,en;q=0.9",
-        },
+        'outtmpl': os.path.join(output_directory, '%(title)s.%(ext)s'),
+        'progress_hooks': [progress_hook],
+        'cookiefile': 'cookies.txt',  # 👈 Use your exported cookies.txt here
+        'quiet': False,
     }
 
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([video_url])
+
+# Root endpoint (optional)
+@app.get("/")
+def root():
+    return {"message": "Welcome to MyTube Downloader API 🎵"}
+
+# Download endpoint
+@app.post("/download")
+def download_video(data: VideoURL):
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=True)
-            title = info.get("title", "audio")
-            filename = ydl.prepare_filename(info)
-            mp3_file = filename.rsplit(".", 1)[0] + ".mp3"
-
-            if os.path.exists(mp3_file):
-                return FileResponse(mp3_file, media_type="audio/mpeg", filename=f"{title}.mp3")
-            else:
-                raise HTTPException(status_code=500, detail="Download failed or file not found")
-
+        download_audio_from_video(data.url)
+        return {"status": "success", "message": "Download completed."}
     except Exception as e:
-        print(f"Error: {e}")
-        raise HTTPException(status_code=500, detail="Download failed")
+        raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
