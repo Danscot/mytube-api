@@ -1,22 +1,30 @@
-from fastapi.responses import FileResponse
-
 @app.post("/download")
-def download_video(data: VideoURL):
+async def download_audio(data: dict):
     try:
-        # Download video
-        download_audio_from_video(data.url)
+        url = data.get("url")
+        print(f"Received URL: {url}")
 
-        # Find the last downloaded .mp3 file
-        files = sorted(
-            [f for f in os.listdir(output_directory) if f.endswith(".mp3")],
-            key=lambda x: os.path.getmtime(os.path.join(output_directory, x)),
-            reverse=True
-        )
+        if not url:
+            raise HTTPException(status_code=400, detail="URL is required")
 
-        if not files:
-            raise Exception("No MP3 file found after download.")
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': 'downloaded_song.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+        }
 
-        last_file = os.path.join(output_directory, files[0])
-        return FileResponse(last_file, media_type="audio/mpeg", filename=files[0])
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info).replace(info['ext'], 'mp3')
+
+        print(f"Sending file: {filename}")
+
+        return FileResponse(filename, media_type='audio/mpeg', filename='song.mp3')
+
     except Exception as e:
+        print("❌ Download failed:", str(e))
         raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
