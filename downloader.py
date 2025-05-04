@@ -1,34 +1,45 @@
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 import yt_dlp
 import os
 import uuid
-#curl -X POST https://mytube-api-3s7w.onrender.com/download   -H "Content-Type: application/json"   -d '{"url": "https://www.youtube.com/watch?v=eackOZW_bZQ"}'   --output laugh.mp3
 
-def download_audio(url):
-    output_dir = "downloads"
-    os.makedirs(output_dir, exist_ok=True)
+app = FastAPI()
 
-    filename = f"{uuid.uuid4()}.%(ext)s"
-    output_path = os.path.join(output_dir, filename)
-    final_path = ""
+@app.post("/download")
+async def download_audio(data: dict):
+    try:
+        url = data.get("url")
+        print(f"🎯 Received URL: {url}")
 
-    yt_dlp_options = {
-    "format": "bestaudio/best",
-    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/117.0.0.0 Safari/537.36",
-    "outtmpl": "downloads/%(title)s.%(ext)s",
-    "postprocessors": [{
-        "key": "FFmpegExtractAudio",
-        "preferredcodec": "mp3",
-        "preferredquality": "192",
-    }],
-}
+        if not url:
+            raise HTTPException(status_code=400, detail="URL is required")
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        base = ydl.prepare_filename(info)
-        final_path = os.path.splitext(base)[0] + ".mp3"
+        file_id = str(uuid.uuid4())
+        base_filename = f"{file_id}.%(ext)s"
+        final_mp3 = f"{file_id}.mp3"
 
-    if os.path.exists(final_path):
-        return final_path
-    else:
-        raise Exception(f"Download failed or file not found: {final_path}")
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': base_filename,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'quiet': True
+        }
 
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+
+        print(f"✅ File ready: {final_mp3}")
+        return FileResponse(final_mp3, media_type='audio/mpeg', filename='song.mp3')
+
+    except Exception as e:
+        print(f"❌ Download failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Download failed: {e}")
+
+    finally:
+        if os.path.exists(final_mp3):
+            os.remove(final_mp3)
