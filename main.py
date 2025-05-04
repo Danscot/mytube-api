@@ -1,38 +1,56 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
-import httpx
+from pydantic import BaseModel
 import os
-import uuid
+import yt_dlp
 
 app = FastAPI()
 
-# New server URL (Server 2)
-NEW_SERVER_URL = "https://mytube-api-1.onrender.com"
+#curl -X POST https://mytube-api-3s7w.onrender.com/download   -H "Content-Type: application/json"   -d '{"url": "https://www.youtube.com/watch?v=XTB_s1E6BRA"}'   --output laugh.mp3
+
+
+output_directory = 'Download__'
+os.makedirs(output_directory, exist_ok=True)
+
+class VideoURL(BaseModel):
+    url: str
+
+def progress_hook(d):
+    if d['status'] == 'downloading':
+        percent = d.get('_percent_str', 'N/A')
+        speed = d.get('speed') or 0
+        elapsed = d.get('elapsed') or 0
+        eta = d.get('eta') or 0
+        print(f"Downloading: {percent} at {speed / 1024:.2f} KB/s, Elapsed: {elapsed:.2f}s, ETA: {eta:.2f}s")
+    elif d['status'] == 'finished':
+        print(f"✅ Finished downloading: {d['filename']}")
+
+def download_audio_from_video(video_url: str):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': os.path.join(output_directory, '%(title)s.%(ext)s'),
+        'progress_hooks': [progress_hook],
+        'cookiefile': 'cookies.txt',
+        'quiet': False,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([video_url])
 
 @app.get("/")
 def root():
-    return {"message": "YouTube Downloader Proxy API running"}
+    return {"message": "Welcome to MyTube Downloader API 🎵"}
 
 @app.post("/download")
-async def download_video(data: dict):
+def download_video(data: VideoURL):
     try:
-        # Forward the request to the new server
-        async with httpx.AsyncClient() as client:
-            response = await client.post(f"{NEW_SERVER_URL}/download", json=data)
-
-        # Check if request was successful
-        if response.status_code == 200:
-            temp_filename = f"/tmp/{uuid.uuid4()}.mp3"
-            with open(temp_filename, "wb") as f:
-                f.write(response.content)
-
-            return FileResponse(temp_filename, media_type="audio/mpeg", filename="downloaded_song.mp3")
-        else:
-            raise HTTPException(status_code=response.status_code, detail=f"Failed to download: {response.text}")
-    
+        download_audio_from_video(data.url)
+        return {"status": "success", "message": "Download completed."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Proxy failed: {str(e)}")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=10000)
+        raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
+        
+        
