@@ -16,13 +16,11 @@ def root():
 @app.post("/download")
 async def download_video(data: dict):
     try:
+        # Forward the request to the new server
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{NEW_SERVER_URL}/download",
-                data={"url": data["url"]},
-                headers={"Content-Type": "application/x-www-form-urlencoded"}
-            )
+            response = await client.post(f"{NEW_SERVER_URL}/download", json=data)
 
+        # Check if request was successful
         if response.status_code == 200:
             temp_filename = f"/tmp/{uuid.uuid4()}.mp3"
             with open(temp_filename, "wb") as f:
@@ -31,7 +29,10 @@ async def download_video(data: dict):
             return FileResponse(temp_filename, media_type="audio/mpeg", filename="downloaded_song.mp3")
         else:
             raise HTTPException(status_code=response.status_code, detail=f"Failed to download: {response.text}")
-
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Proxy failed: {str(e)}")
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=10000)
