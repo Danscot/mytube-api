@@ -5,14 +5,14 @@ import yt_dlp
 
 class Ytdl:
 
-    def __init__(self, url:str):
+    def __init__(self, url: str):
 
         self.url = url
 
-        self.ouput_dir = "Downloads"
+        self.output_dir = "Downloads"
 
-        os.makedirs(self.ouput_dir, exist_ok=True)
-
+        os.makedirs(self.output_dir, exist_ok=True)
+  
     def progress_hook(self, d):
 
         if d['status'] == 'downloading':
@@ -27,8 +27,7 @@ class Ytdl:
 
             print(f"✅ Finished downloading: {d['filename']}")
 
-    def mp3_downl(self):
-
+    def get_mp3(self):
 
         ydl_opts = {
 
@@ -44,9 +43,9 @@ class Ytdl:
 
             }],
 
-            'outtmpl': os.path.join(output_directory, '%(title)s.%(ext)s'),
+            'outtmpl': os.path.join(self.output_dir, '%(title)s.%(ext)s'),
 
-            'progress_hooks': [progress_hook],
+            'progress_hooks': [self.progress_hook],
 
             'cookiefile': 'cookies.txt',
 
@@ -55,4 +54,8 @@ class Ytdl:
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 
-            ydl.download([video_url])
+            info = ydl.extract_info(self.url, download=True)
+
+            filename = ydl.prepare_filename(info)
+
+            return os.path.splitext(filename)[0] + ".mp3"
