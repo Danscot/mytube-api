@@ -17,7 +17,7 @@ It lets you download audio from YouTube videos directly as MP3 files.
 
 1. Clone this repository and navigate into it:
    ```bash
-   git clonehttps://github.com/Danscot/mytube-api.git
+   git clone https://github.com/Danscot/mytube-api.git
 
    cd mytube-api
 ```
@@ -39,4 +39,19 @@ docker run -d -p 8000:8000 mytube
 
 - The API will be available at:
 
-http://127.0.0.1:8000
+http://127.0.0.1:8000/youtube
+
+- Inorder to do request use
+
+ POST http://127.0.0.1:8000/youtube/download/mp3?url="Youtube_video_url"
+
+## Example
+
+- Using curl
+
+```bash
+
+curl -X POST http://127.0.0.1:8000/youtube/download/mp3?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+
+```
