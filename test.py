@@ -7,19 +7,30 @@ output_directory = 'Download__'
 os.makedirs(output_directory, exist_ok=True)
 
 # Progress hook function (optional but helpful)
-def progress_hook(d):
+
+def progress_hook(self, d):
 
     if d['status'] == 'downloading':
 
         percent = d.get('_percent_str', 'N/A')
 
-        speed = d.get('speed', 0)
+        speed = d.get('speed')  # may be None
 
-        print(f"Downloading: {percent} at {speed / 1024:.2f} KB/s")
+        if speed:
+
+            speed_kb = f"{speed / 1024:.2f} KB/s"
+
+        else:
+
+            speed_kb = "Unknown"
+
+        print(f"Downloading: {percent} at {speed_kb}")
+
 
     elif d['status'] == 'finished':
-
+        
         print(f"✅ Finished downloading: {d['filename']}")
+
 
 # Main function to download audio
 def download_audio_from_video(video_url):
