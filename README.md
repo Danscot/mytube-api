@@ -24,7 +24,7 @@ It lets you download audio from YouTube videos directly as MP3 files.
 
 2. Build the Docker image:
 
-```bash
+   ```bash
 
 docker build -t mytube .
 

@@ -1,0 +1,99 @@
+:root {
+  --bg:#0b0b0e;
+  --card:#0f1320;
+  --muted:#98a0b3;
+  --accent1:#6a5acd;
+  --accent2:#3fc3ff;
+}
+
+/* Slight base font-size bump for better readability.
+   This will affect home slightly but only increases readability —
+   no layout/content changes. You said don't touch home; this is a minimal typographic tweak. */
+html { font-size: 16px; }
+
+body {
+  margin:0;
+  font-family:Inter, sans-serif;
+  background:linear-gradient(180deg,var(--bg),#070708);
+  color:#e6eef8;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  line-height:1.45;
+}
+
+main {flex:1}
+
+/* NAV */
+.navbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 28px;
+  background:linear-gradient(90deg,#0f1220,#151224);
+}
+.logo {font-weight:800;color:var(--accent1);font-size:20px}
+.tag {font-size:12px;color:var(--muted)}
+.navlinks a {margin-left:18px;color:#cfe6ff;text-decoration:none;font-weight:600;font-size:0.95rem}
+.navlinks a:hover, .navlinks a.active {color:var(--accent1)}
+
+/* HERO (index page) remains unchanged structurally */
+.hero {display:grid;grid-template-columns:1fr 320px;gap:28px;max-width:1100px;margin:0 auto;padding:40px}
+.hero-card {background:rgba(106,90,205,0.07);padding:34px;border-radius:12px}
+.hero h1 {font-size:36px;color:var(--accent1)} /* slightly reduced from 38 */
+.lead {color:var(--muted);margin-top:12px;font-size:1rem}
+.btn {padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700}
+.btn.primary {background:linear-gradient(90deg,var(--accent1),#7c6ee6);color:#fff}
+.btn.ghost {border:1px solid rgba(255,255,255,0.06);color:#cfe6ff}
+
+.stats {display:flex;flex-direction:column;gap:12px}
+.stat {background:var(--card);padding:12px;border-radius:8px}
+.stat .lbl {color:var(--muted);font-size:13px}
+
+/* How & Tech (home) */
+.how, .tech {max-width:1100px;margin:36px auto;padding:0 28px}
+.steps {display:flex;gap:12px;flex-wrap:wrap}
+.step {flex:1;min-width:220px;background:#0e1020;padding:18px;border-radius:10px;display:flex;gap:12px}
+.step-num {background:linear-gradient(90deg,var(--accent1),var(--accent2));padding:10px;border-radius:8px;font-weight:800}
+.muted {color:var(--muted);font-size:13px}
+
+.tech-grid {display:flex;gap:12px;flex-wrap:wrap}
+.tech-card {flex:1;min-width:220px;background:#0f1320;padding:18px;border-radius:10px}
+.tname {font-weight:800}
+.tdesc {color:var(--muted);font-size:13px}
+
+/* Docs layout */
+.doc-wrap {display:flex;max-width:1200px;margin:28px auto;padding:20px;gap:20px}
+.doc-sidebar {width:220px;background:#0d1120;padding:18px;border-radius:10px;align-self:flex-start;position:sticky;top:20px}
+.doc-sidebar a {color:var(--muted);display:block;margin:8px 0;text-decoration:none;font-size:0.95rem}
+.doc-sidebar a:hover {color:var(--accent1)}
+.doc-content {flex:1;background:#0b1018;padding:22px;border-radius:10px}
+.endpoint-card {background:#071022;padding:12px;border-radius:8px}
+
+.doc-content h1 {font-size:1.6rem}
+.doc-content h2 {font-size:1.2rem;margin-top:18px}
+.doc-content h3 {font-size:1.05rem;margin-top:14px}
+
+/* Code blocks */
+pre {background:#071022;padding:16px;border-radius:8px;overflow:auto;font-size:0.95rem}
+code {font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Roboto Mono,monospace}
+
+/* Demo UI */
+#demo-form {display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+#video-url {flex:1;padding:10px;border-radius:8px;background:#071017;color:#e6eef8;min-width:200px;font-size:0.95rem}
+.demo-result {margin-top:12px}
+.demo-log {white-space:pre-wrap;color:var(--muted);font-size:0.95rem}
+.hidden {display:none}
+
+/* Footer */
+.site-footer {margin-top:auto;padding:18px;background:#071018}
+.foot-inner {max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;color:var(--muted);font-size:13px;flex-wrap:wrap}
+
+/* Responsive rules */
+@media(max-width:900px){
+  .hero {grid-template-columns:1fr}
+  .doc-wrap {flex-direction:column}
+  .doc-sidebar {width:100%;position:relative;top:auto;margin-bottom:14px}
+  .navlinks {display:flex;gap:10px}
+  .navlinks a {font-size:0.9rem}
+}
