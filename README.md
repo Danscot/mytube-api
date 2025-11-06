@@ -39,11 +39,11 @@ docker run -d -p 8000:8000 mytube
 
 - The API will be available at:
 
-http://127.0.0.1:8000/youtube
+http://127.0.0.1:8000/
 
 - Inorder to do request use
 
- POST http://127.0.0.1:8000/youtube/download/mp3?url="Youtube_video_url"
+ GET http://127.0.0.1:8000/youtube/mp3?url="Youtube_video_url"
 
 ## Example
 
@@ -51,7 +51,7 @@ http://127.0.0.1:8000/youtube
 
 ```bash
 
-curl -X POST http://127.0.0.1:8000/youtube/download/mp3?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ
+curl -X GET http://127.0.0.1:8000/youtube/mp3?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 
 ```
