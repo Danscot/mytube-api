@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mytube API</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">
+      <div class="logo">Mytube</div>
+      <div class="tag">Audio Downloader API</div>
+    </div>
+    <nav class="navlinks">
+      <a href="index.html" class="active">Home</a>
+      <a href="docs.html">Docs</a>
+      <a href="https://github.com/Danscot/mytube-api" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="hero-wrap">
+    <section class="hero">
+      <div class="hero-card">
+        <h1>🎧 Mytube API</h1>
+        <p class="lead">Download YouTube audio in the best possible quality — fast, simple, and without tokens.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="docs.html">Read Docs</a>
+          <a class="btn ghost" href="https://github.com/Danscot/mytube-api" target="_blank" rel="noopener">View on GitHub</a>
+        </div>
+      </div>
+
+      <div class="hero-side">
+        <div class="stats">
+          <div class="stat">
+            <div class="num">/download</div>
+            <div class="lbl">Single endpoint — download audio</div>
+          </div>
+          <div class="stat">
+            <div class="num">No Auth</div>
+            <div class="lbl">No API keys required</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Send a request</strong>
+            <div class="muted">GET /download?url=&lt;youtube_url&gt;</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Server downloads audio</strong>
+            <div class="muted">Using yt-dlp optimized for best audio quality</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Return audio file</strong>
+            <div class="muted">Streamed as mp3/m4a</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tech">
+      <h2>Tech stack</h2>
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tname">Python</div>
+          <div class="tdesc">Backend with yt-dlp orchestration</div>
+        </div>
+        <div class="tech-card">
+          <div class="tname">Docker</div>
+          <div class="tdesc">Containerised runtime for scaling</div>
+        </div>
+        <div class="tech-card">
+          <div class="tname">Cookies & Session Pool</div>
+          <div class="tdesc">Mitigate IP bans from bot activity</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="foot-inner">
+      <div>Made with ❤️ by Danscot</div>
+      <div class="small muted">Built with Python • Docker • yt-dlp</div>
+    </div>
+  </footer>
+</body>
+</html>

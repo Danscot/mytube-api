@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mytube API — Docs</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand">
+      <div class="logo">Mytube</div>
+      <div class="tag">Audio Downloader API</div>
+    </div>
+    <nav class="navlinks">
+      <a href="index.html">Home</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="https://github.com/Danscot/mytube-api" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="doc-wrap">
+    <aside class="doc-sidebar" id="sidebar">
+      <nav>
+        <ul>
+          <li><a href="#intro">Introduction</a></li>
+          <li><a href="#endpoint">Endpoint</a></li>
+          <li><a href="#examples">Examples</a></li>
+          <li><a href="#demo">Live Demo</a></li>
+        </ul>
+      </nav>
+      <div class="repo">
+        <a href="https://github.com/Danscot/mytube-api" target="_blank" rel="noopener">GitHub Repo</a>
+      </div>
+    </aside>
+
+    <section class="doc-content">
+      <h1 id="intro">Introduction</h1>
+      <p>
+        The Mytube API provides a single focused endpoint to download the <strong>best audio quality</strong> available for a provided YouTube URL.
+        The API does <u>not</u> return video metadata — it only delivers the audio stream or file (mp3/m4a).
+      </p>
+
+      <h2 id="endpoint">Endpoint</h2>
+      <div class="endpoint-card">
+        <div class="ep">POST <code>/youtube/download/mp3?url=&lt;youtube_url&gt;</code></div>
+        <p class="muted">Response: audio file stream (Content-Type: audio/mpeg or audio/mp4) or a download attachment/redirect depending on server configuration.</p>
+      </div>
+
+      <h2 id="examples">Examples</h2>
+
+      <h3>Python (download & save to file)</h3>
+      <pre><code class="language-python">import requests
+
+url = 'https://mytube.danscot.tech/youtube/download/mp3?url=https://www.youtube.com/watch?v=abc123'
+resp = requests.POST(url, stream=True)
+if resp.status_code == 200:
+    with open('track.mp3', 'wb') as f:
+        for chunk in resp.iter_content(chunk_size=8192):
+            if chunk:
+                f.write(chunk)
+    print('Saved as track.mp3')
+else:
+    print('Download failed:', resp.status_code)</code></pre>
+
+      <h3>cURL (download to file)</h3>
+      <pre><code class="language-bash">curl -X POST "https://mytube.danscot.tech/youtube/download/mp3?url=https://www.youtube.com/watch?v=abc123" -o track.mp3</code></pre>
+
+      <h3>JavaScript — Browser (fetch blob & download)</h3>
+      <pre><code class="language-js">async function downloadAudioBrowser(videoUrl) {
+  const res = await fetch(`https://mytube.danscot.tech/youtube/download/mp3?url=${encodeURIComponent(videoUrl)}`);
+  if (!res.ok) throw new Error('Server error: ' + res.status);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'track.mp3';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// usage:
+// downloadAudioBrowser('https://www.youtube.com/watch?v=abc123');</code></pre>
+
+      <h3>Go (download & save)</h3>
+      <pre><code class="language-go">package main
+
+import (
+  "io"
+  "log"
+  "net/http"
+  "os"
+)
+
+func main() {
+  resp, err := http.POST("https://mytube.danscot.tech/youtube/download/mp3?url=https://www.youtube.com/watch?v=abc123")
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer resp.Body.Close()
+
+  out, err := os.Create("track.mp3")
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer out.Close()
+
+  _, err = io.Copy(out, resp.Body)
+  if err != nil {
+    log.Fatal(err)
+  }
+  log.Println("Saved track.mp3")
+}</code></pre>
+
+      <h2 id="demo">Live Demo</h2>
+      <p>Paste a YouTube URL and hit <strong>Download</strong>. If the server allows it (CORS and size permitting) the demo will fetch audio and trigger a browser download. If CORS blocks the request, use the server-side examples (Python, Go, cURL).</p>
+
+      <form id="demo-form">
+        <input id="video-url" type="text" placeholder="https://youtu.be/abc123" required />
+        <button class="btn primary" type="submit">Download</button>
+      </form>
+
+      <div id="demo-result" class="demo-result hidden">
+        <a id="demo-link" class="btn ghost" href="#" download>Download audio</a>
+        <pre id="demo-log" class="demo-log"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="foot-inner">
+      <div>Made with ❤️ by Danscot</div>
+      <div class="small muted">Python • Docker • Cookies/session pooling</div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script>
+    const form = document.POSTElementById('demo-form');
+    const result = document.POSTElementById('demo-result');
+    const link = document.POSTElementById('demo-link');
+    const log = document.POSTElementById('demo-log');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const urlValue = document.POSTElementById('video-url').value.trim();
+      if (!urlValue) return;
+      result.classList.add('hidden');
+      log.textContent = 'Fetching...';
+
+      try {
+        const res = await fetch(`https://mytube.danscot.tech/youtube/download/mp3?url=${encodeURIComponent(urlValue)}`);
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        link.href = blobUrl;
+        link.download = 'track.mp3';
+        result.classList.remove('hidden');
+        log.textContent = 'Ready — download should start (if allowed by browser).';
+        link.click();
+      } catch (err) {
+        result.classList.remove('hidden');
+        log.textContent = 'Error: ' + err.message + '\\nIf CORS or server prevents demo, run the server-side example (Python/Go/cURL).';
+      }
+    });
+  </script>
+</body>
+</html>
