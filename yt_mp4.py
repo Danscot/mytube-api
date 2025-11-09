@@ -14,6 +14,7 @@ class Yt_mp4:
             "format": "best",
             "outtmpl": os.path.join(self.output_dir, "%(title)s.%(ext)s"),
             "quiet": True,
+            "cookiefile":"cookies.txt"
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
