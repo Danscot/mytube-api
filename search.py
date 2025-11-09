@@ -5,7 +5,7 @@ class YtSearch:
         self.query = query
 
     def search(self, limit=10):
-        ydl_opts = {"quiet": True, "skip_download": True}
+        ydl_opts = {"quiet": True, "skip_download": True, "cookiefile": "cookies.txt"}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             result = ydl.extract_info(f"ytsearch{limit}:{self.query}", download=False)
 
