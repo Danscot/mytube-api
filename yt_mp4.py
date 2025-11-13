@@ -11,12 +11,14 @@ class Yt_mp4:
 
     def download(self):
         ydl_opts = {
-            "format": "best",
-            "outtmpl": os.path.join(self.output_dir, "%(title)s.%(ext)s"),
-            "quiet": True,
+            'format': 'bestvideo+bestaudio/best',
+            'outtmpl': 'Downloads/%(title)s.%(ext)s',
+             'cookiefile': 'cookies.txt',
+            'quiet': True
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(self.url, download=True)
-            return ydl.prepare_filename(info)
-
+            filename = f"{info['title']}.mp4"
+            filepath = os.path.join('Downloads', filename)
+            return filepath, filename

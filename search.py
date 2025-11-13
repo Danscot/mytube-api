@@ -1,22 +1,39 @@
-import yt_dlp
+import requests
+
 
 class YtSearch:
-    def __init__(self, query: str):
+    def __init__(self, query: str, api_key: str = None):
         self.query = query
+        # Get API key from parameter or environment variable
+        self.api_key = api_key 
+        if not self.api_key:
+            raise ValueError("YouTube API key is required. Set YOUTUBE_API_KEY or pass it directly.")
 
     def search(self, limit=10):
-        ydl_opts = {"quiet": True, "skip_download": True}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            result = ydl.extract_info(f"ytsearch{limit}:{self.query}", download=False)
+        url = "https://www.googleapis.com/youtube/v3/search"
+        params = {
+            "part": "snippet",
+            "q": self.query,
+            "type": "video",
+            "maxResults": limit,
+            "key": self.api_key,
+        }
 
+        response = requests.get(url, params=params)
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch data: {response.text}")
+
+        data = response.json()
         videos = []
-        for entry in result.get("entries", []):
+        for item in data.get("items", []):
+            video_id = item["id"]["videoId"]
+            snippet = item["snippet"]
             videos.append({
-                "title": entry.get("title"),
-                "url": f"https://www.youtube.com/watch?v={entry.get('id')}",
-                "thumbnail": entry.get("thumbnail"),
-                "duration": entry.get("duration"),
-                "channel": entry.get("uploader"),
+                "title": snippet["title"],
+                "url": f"https://www.youtube.com/watch?v={video_id}",
+                "thumbnail": snippet["thumbnails"]["high"]["url"],
+                "channel": snippet["channelTitle"],
+                "description": snippet.get("description", ""),
             })
 
         return videos

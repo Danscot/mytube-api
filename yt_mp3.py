@@ -56,6 +56,6 @@ class Yt_mp3:
 
             info = ydl.extract_info(self.url, download=True)
 
-            filename = ydl.prepare_filename(info)
-
-            return os.path.splitext(filename)[0] + ".mp3"
+            filename = f"{info['title']}.mp3"
+            filepath = os.path.join('Downloads', filename)
+            return filepath, filename
