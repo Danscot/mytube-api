@@ -10,6 +10,7 @@ class YtSearch:
             raise ValueError("YouTube API key is required. Set YOUTUBE_API_KEY or pass it directly.")
 
     def search(self, limit=10):
+<<<<<<< HEAD
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {
             "part": "snippet",
@@ -18,6 +19,11 @@ class YtSearch:
             "maxResults": limit,
             "key": self.api_key,
         }
+=======
+        ydl_opts = {"quiet": True, "skip_download": True, "cookiefile": "cookies.txt"}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            result = ydl.extract_info(f"ytsearch{limit}:{self.query}", download=False)
+>>>>>>> f7d2f909e44c43845ba43e16d6c133a630e561d7
 
         response = requests.get(url, params=params)
         if response.status_code != 200:
